@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, Alert } from "react-native";
 import React, { useState } from "react";
 import { icons, images } from "@/constants";
 import InputField from "@/components/InputField";
@@ -15,8 +15,9 @@ const SignUp = () => {
     email: "",
     password: "",
   });
+
   const [verification, setVerification] = useState({
-    state: "",
+    state: "default",
     error: "",
     code: "",
   });
@@ -39,7 +40,7 @@ const SignUp = () => {
         state: "pending",
       });
     } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2));
+      Alert.alert("Error", err.errors[0].longMessage);
     }
   };
 
@@ -68,7 +69,7 @@ const SignUp = () => {
     } catch (err: any) {
       setVerification({
         ...verification,
-        error: err.errors[0].longMessages,
+        error: err.errors[0].longMessage,
         state: "failed",
       });
     }
@@ -128,7 +129,7 @@ const SignUp = () => {
         </View>
 
         <ReactNativeModal
-          isVisible={true}
+          isVisible={verification.state === "pending"}
           onModalHide={() =>
             setVerification({ ...verification, state: "success" })
           }
@@ -164,7 +165,7 @@ const SignUp = () => {
         </ReactNativeModal>
 
         <ReactNativeModal isVisible={verification.state === "success"}>
-          <View>
+          <View className="px-7 py-7 bg-white min-h-[300px] rounded-2xl">
             <Image
               source={images.check}
               className="w-[110px] h-[110px] mx-auto my-5"
@@ -178,7 +179,10 @@ const SignUp = () => {
             <CustomButton
               title="Browse Home"
               className="py-3 mt-5"
-              onPress={() => router.replace("/(root)/(tabs)/home")}
+              onPress={() => {
+                setVerification({ ...verification, state: "default" });
+                router.push("/(root)/(tabs)/home");
+              }}
             />
           </View>
         </ReactNativeModal>
